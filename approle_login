@@ -9,9 +9,9 @@ import (
 
 func main() {
 	// Provide the AppRole Role ID, Secret ID, and Vault server address
-	roleID := "your-approle-role-id"
-	secretID := "your-approle-secret-id"
-	vaultAddress := "http://your-vault-server:8200", // Replace with your Vault server address
+	roleID := "your-approle-role-id"				    // Replace with your Vault server approle role ID
+	secretID := "your-approle-secret-id"				    // Replace with your Vault server approle role ID
+	vaultAddress := "http://your-vault-server:8200" 		    // Replace with your Vault server address
 
 	// Get the Vault token using AppRole credentials
 	token, err := getVaultToken(roleID, secretID, vaultAddress)
