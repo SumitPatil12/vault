@@ -1,0 +1,66 @@
+package main
+
+import (
+	"fmt"
+	"log"
+
+	"github.com/hashicorp/vault/api"
+)
+
+func main() {
+	// Provide the AppRole Role ID, Secret ID, and Vault server address
+	roleID := "your-approle-role-id"
+	secretID := "your-approle-secret-id"
+	vaultAddress := "http://your-vault-server:8200", // Replace with your Vault server address
+
+	// Get the Vault token using AppRole credentials
+	token, err := getVaultToken(roleID, secretID, vaultAddress)
+	if err != nil {
+		log.Fatalf("Failed to obtain Vault token: %v", err)
+	}
+
+	// Print the obtained token
+	fmt.Println("Vault token:", token)
+
+	// Use the token to log in to Vault
+	client, err := api.NewClient(&api.Config{
+		Address: vaultAddress,
+	})
+	if err != nil {
+		log.Fatalf("Failed to create Vault client: %v", err)
+	}
+
+	client.SetToken(token)
+
+	// Perform Vault operations
+	// ...
+
+	// Print success message
+	fmt.Println("Vault login successful!")
+}
+
+func getVaultToken(roleID, secretID, vaultAddress string) (string, error) {
+	// Create a new Vault API client
+	client, err := api.NewClient(&api.Config{
+		Address: vaultAddress,
+	})
+	if err != nil {
+		return "", fmt.Errorf("failed to create Vault client: %w", err)
+	}
+
+	// Set the AppRole credentials in the client
+	//client.SetAppRole(roleID, secretID)
+
+	// Authenticate with Vault using the AppRole credentials
+	secret, err := client.Logical().Write("auth/approle/login", map[string]interface{}{
+		"role_id":   roleID,
+		"secret_id": secretID,
+	})
+	if err != nil {
+		return "", fmt.Errorf("failed to authenticate with Vault: %w", err)
+	}
+
+	// Extract the token from the Vault response
+	token := secret.Auth.ClientToken
+	return token, nil
+}
